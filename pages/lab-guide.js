@@ -120,9 +120,8 @@ export default function LabGuide() {
   const [isUnlocked, setIsUnlocked] = useState(false);
 
   useEffect(() => {
-    // Target time: 10:00 PM today (local time)
-    const now = new Date();
-    const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 22, 0, 0);
+    // Target time: March 12, 2026 at 11:00 AM (WAT / UTC+1) — 15 hours from deployment
+    const targetDate = new Date('2026-03-12T11:00:00+01:00');
     
     const calculateTimeLeft = () => {
       const currentTime = new Date();
@@ -132,12 +131,12 @@ export default function LabGuide() {
         setIsUnlocked(true);
         setTimeLeft('');
       } else {
-        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+        const totalHours = Math.floor(difference / (1000 * 60 * 60));
         const minutes = Math.floor((difference / 1000 / 60) % 60);
         const seconds = Math.floor((difference / 1000) % 60);
         
         setTimeLeft(
-          `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+          `${totalHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
         );
       }
     };
@@ -168,7 +167,7 @@ export default function LabGuide() {
           <div className="max-w-md mx-auto mt-12 bg-vault-card border border-amber-500/30 rounded-2xl p-8 text-center shadow-[0_0_30px_rgba(245,158,11,0.1)]">
             <span className="text-5xl mb-4 block">🔒</span>
             <h2 className="text-2xl font-bold text-white mb-2">Lab Guide Locked</h2>
-            <p className="text-vault-text-muted mb-6">The challenge details will automatically unlock tonight at 10:00 PM.</p>
+            <p className="text-vault-text-muted mb-6">The challenge details will automatically unlock on March 12th at 11:00 AM.</p>
             <div className="font-mono text-4xl font-bold text-amber-400 tracking-wider">
               {timeLeft || '00:00:00'}
             </div>
