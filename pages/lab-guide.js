@@ -1,5 +1,6 @@
 import Layout from '@/components/Layout';
 import Head from 'next/head';
+import { useState, useEffect } from 'react';
 
 const challenges = [
   {
@@ -115,6 +116,38 @@ const challenges = [
 ];
 
 export default function LabGuide() {
+  const [timeLeft, setTimeLeft] = useState('');
+  const [isUnlocked, setIsUnlocked] = useState(false);
+
+  useEffect(() => {
+    // Target time: 10:00 PM today (local time)
+    const now = new Date();
+    const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 22, 0, 0);
+    
+    const calculateTimeLeft = () => {
+      const currentTime = new Date();
+      const difference = targetDate.getTime() - currentTime.getTime();
+
+      if (difference <= 0) {
+        setIsUnlocked(true);
+        setTimeLeft('');
+      } else {
+        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((difference / 1000 / 60) % 60);
+        const seconds = Math.floor((difference / 1000) % 60);
+        
+        setTimeLeft(
+          `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+        );
+      }
+    };
+
+    calculateTimeLeft(); // Initial calculation
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <Layout title="Lab Guide">
       <Head>
@@ -131,7 +164,19 @@ export default function LabGuide() {
           </p>
         </div>
 
-        {/* Stats */}
+        {!isUnlocked ? (
+          <div className="max-w-md mx-auto mt-12 bg-vault-card border border-amber-500/30 rounded-2xl p-8 text-center shadow-[0_0_30px_rgba(245,158,11,0.1)]">
+            <span className="text-5xl mb-4 block">🔒</span>
+            <h2 className="text-2xl font-bold text-white mb-2">Lab Guide Locked</h2>
+            <p className="text-vault-text-muted mb-6">The challenge details will automatically unlock tonight at 10:00 PM.</p>
+            <div className="font-mono text-4xl font-bold text-amber-400 tracking-wider">
+              {timeLeft || '00:00:00'}
+            </div>
+            <p className="text-xs text-vault-text-muted mt-6 uppercase tracking-widest">Time Remaining</p>
+          </div>
+        ) : (
+          <>
+            {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-vault-card border border-vault-border rounded-xl p-4 text-center">
             <p className="text-3xl font-bold text-emerald-400">10</p>
@@ -198,6 +243,8 @@ export default function LabGuide() {
           <p className="text-emerald-400 text-sm font-medium">🔑 Test Account: player / player123 (ID: 42)</p>
           <p className="text-emerald-400/60 text-xs mt-1">Log in and start hunting!</p>
         </div>
+          </>
+        )}
       </div>
     </Layout>
   );
