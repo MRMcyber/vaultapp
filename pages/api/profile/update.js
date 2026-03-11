@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     values.push(user.id);
     const query = `UPDATE users SET ${setClauses.join(', ')} WHERE id = $${values.length} RETURNING id, username, email, phone, address, role, balance, first_name, last_name`;
 
-    const result = await sql(query, values);
+    const result = await sql.query(query, values);
 
     if (result.length === 0) {
       return res.status(404).json({ error: 'User not found' });
