@@ -63,7 +63,7 @@ export default function Layout({ children, title = 'VaultApp' }) {
 
         {/* Nav links */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {navItems.map(item => {
+          {navItems.filter(item => item.label !== 'Directory' || user.role === 'admin').map(item => {
             const isActive = router.pathname === item.href;
             return (
               <Link

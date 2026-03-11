@@ -6,7 +6,18 @@ import { getDb } from '@/lib/db';
 export default function Directory({ users }) {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userLoaded, setUserLoaded] = useState(false);
   const perPage = 20;
+
+  useEffect(() => {
+    const userData = localStorage.getItem('vault_user');
+    if (userData) {
+      const u = JSON.parse(userData);
+      setIsAdmin(u.role === 'admin');
+    }
+    setUserLoaded(true);
+  }, []);
 
   const filtered = users.filter(u =>
     u.username.toLowerCase().includes(search.toLowerCase()) ||
@@ -25,76 +36,91 @@ export default function Directory({ users }) {
       </Head>
 
       <div className="space-y-6 fade-in">
-        {/* Info notice */}
-        <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
-          <span className="text-xl">📇</span>
-          <div>
-            <p className="text-blue-400 font-medium text-sm">Employee Directory — Internal Use Only</p>
-            <p className="text-blue-400/60 text-xs mt-1">This directory contains contact information for all VaultApp employees.</p>
+        {!isAdmin && userLoaded ? (
+          <div className="max-w-lg mx-auto text-center py-20">
+            <div className="text-6xl mb-4">🔐</div>
+            <h2 className="text-2xl font-bold text-white mb-2">Access Denied</h2>
+            <p className="text-vault-text-muted">You do not have admin privileges to view the employee directory.</p>
+            <div className="mt-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+              <p className="text-amber-400/70 text-xs">
+                💡 Hint: The frontend blocks you from seeing this page, but what if you know the UUID of the person you're targeting?
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Info notice */}
+            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
+              <span className="text-xl">📇</span>
+              <div>
+                <p className="text-blue-400 font-medium text-sm">Employee Directory — Internal Use Only</p>
+                <p className="text-blue-400/60 text-xs mt-1">This directory contains contact information for all VaultApp employees.</p>
+              </div>
+            </div>
 
-        {/* Search */}
-        <div className="bg-vault-card border border-vault-border rounded-xl p-4">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full px-4 py-3 bg-vault-bg border border-vault-border rounded-xl text-white placeholder-vault-text-muted focus:outline-none focus:border-emerald-500 transition-all"
-            placeholder="Search by name, username, or email..."
-          />
-          <p className="text-vault-text-muted text-xs mt-2">{filtered.length} employees found</p>
-        </div>
+            {/* Search */}
+            <div className="bg-vault-card border border-vault-border rounded-xl p-4">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                className="w-full px-4 py-3 bg-vault-bg border border-vault-border rounded-xl text-white placeholder-vault-text-muted focus:outline-none focus:border-emerald-500 transition-all"
+                placeholder="Search by name, username, or email..."
+              />
+              <p className="text-vault-text-muted text-xs mt-2">{filtered.length} employees found</p>
+            </div>
 
-        {/* Table */}
-        <div className="bg-vault-card border border-vault-border rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-vault-border">
-                  <th className="text-left p-4 text-vault-text-muted font-medium">Name</th>
-                  <th className="text-left p-4 text-vault-text-muted font-medium">Username</th>
-                  <th className="text-left p-4 text-vault-text-muted font-medium">Email</th>
-                  <th className="text-left p-4 text-vault-text-muted font-medium">UUID</th>
-                  <th className="text-left p-4 text-vault-text-muted font-medium">Account</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-vault-border">
-                {paged.map(u => (
-                  <tr key={u.id} className="hover:bg-white/[0.02]">
-                    <td className="p-4 text-white font-medium">{u.first_name} {u.last_name}</td>
-                    <td className="p-4 text-vault-text-muted">@{u.username}</td>
-                    <td className="p-4 text-vault-text-muted">{u.email}</td>
-                    <td className="p-4 font-mono text-xs text-amber-400">{u.uuid}</td>
-                    <td className="p-4 font-mono text-xs text-vault-text-muted">{u.account_number}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+            {/* Table */}
+            <div className="bg-vault-card border border-vault-border rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-vault-border">
+                      <th className="text-left p-4 text-vault-text-muted font-medium">Name</th>
+                      <th className="text-left p-4 text-vault-text-muted font-medium">Username</th>
+                      <th className="text-left p-4 text-vault-text-muted font-medium">Email</th>
+                      <th className="text-left p-4 text-vault-text-muted font-medium">UUID</th>
+                      <th className="text-left p-4 text-vault-text-muted font-medium">Account</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-vault-border">
+                    {paged.map(u => (
+                      <tr key={u.id} className="hover:bg-white/[0.02]">
+                        <td className="p-4 text-white font-medium">{u.first_name} {u.last_name}</td>
+                        <td className="p-4 text-vault-text-muted">@{u.username}</td>
+                        <td className="p-4 text-vault-text-muted">{u.email}</td>
+                        <td className="p-4 font-mono text-xs text-amber-400">{u.uuid}</td>
+                        <td className="p-4 font-mono text-xs text-vault-text-muted">{u.account_number}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-4 py-2 bg-vault-card border border-vault-border rounded-lg text-sm text-vault-text-muted hover:text-white disabled:opacity-40 transition-all"
-            >
-              ← Prev
-            </button>
-            <span className="text-vault-text-muted text-sm px-4">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="px-4 py-2 bg-vault-card border border-vault-border rounded-lg text-sm text-vault-text-muted hover:text-white disabled:opacity-40 transition-all"
-            >
-              Next →
-            </button>
-          </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 bg-vault-card border border-vault-border rounded-lg text-sm text-vault-text-muted hover:text-white disabled:opacity-40 transition-all"
+                >
+                  ← Prev
+                </button>
+                <span className="text-vault-text-muted text-sm px-4">
+                  Page {page} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="px-4 py-2 bg-vault-card border border-vault-border rounded-lg text-sm text-vault-text-muted hover:text-white disabled:opacity-40 transition-all"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </Layout>
