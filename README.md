@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏦 VaultApp — IDOR Security Training Lab
 
-## Getting Started
+A full-stack deliberately vulnerable web application designed for practising **Insecure Direct Object Reference (IDOR)** vulnerability discovery and exploitation.
 
-First, run the development server:
+> ⚠️ **This is an intentionally vulnerable application for educational purposes only.** Do NOT deploy to a production environment or expose to the public internet.
 
+## 🎯 Overview
+
+VaultApp simulates a personal finance and document management portal with **10 intentionally exploitable IDOR vulnerabilities**. It's designed as a medium-difficulty security training lab for penetration testing practice.
+
+### Features
+- 300 seeded user accounts with realistic fake data
+- 6 database tables (users, transactions, messages, documents, notes, audit_logs)
+- 10 distinct IDOR vulnerabilities across different attack patterns
+- Dark-themed fintech UI that looks like a real application
+- Built-in Lab Guide with challenge descriptions and hints
+
+## 🧱 Tech Stack
+
+- **Framework:** Next.js 14 (Pages Router)
+- **Styling:** Tailwind CSS
+- **Database:** Neon Postgres (serverless)
+- **Auth:** JWT (localStorage)
+- **Deployment:** Vercel
+
+## 🚀 Quick Start
+
+### 1. Clone the Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repo-url>
+cd vaultapp
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Set Up Neon Postgres Database
+1. Go to [neon.tech](https://neon.tech) and create a free account
+2. Create a new project and database
+3. Copy your connection string
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Configure Environment
+Create a `.env.local` file (or copy from `.env.example`):
+```
+DATABASE_URL=postgresql://user:pass@host/dbname?sslmode=require
+JWT_SECRET=vaultapp-secret-key-2024
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Seed the Database
+```bash
+node scripts/seed.js
+```
+This creates all tables and inserts:
+- 300 users
+- 1,800 transactions
+- 1,200 messages
+- 900 documents
+- 600 notes
+- 900 audit log entries
 
-## Learn More
+### 5. Run the App
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000)
 
-To learn more about Next.js, take a look at the following resources:
+## 🔑 Test Credentials
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Account | Username | Password | User ID | Role |
+|---------|----------|----------|---------|------|
+| Player | `player` | `player123` | 42 | user |
+| Admin 1 | `sysadmin` | `adminpass1` | 299 | admin |
+| Admin 2 | `rootadmin` | `adminpass2` | 300 | admin |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🎯 Lab Objectives
 
-## Deploy on Vercel
+Find and exploit all 10 IDOR vulnerabilities:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| # | Vulnerability | Difficulty | Method |
+|---|--------------|------------|--------|
+| 1 | Sequential ID Enumeration | Easy | GET |
+| 2 | Query Parameter Manipulation | Easy | GET |
+| 3 | POST Body Object Reference | Medium | POST |
+| 4 | Mass Assignment Attack | Medium | POST |
+| 5 | Base64 Encoded ID Bypass | Medium | GET |
+| 6 | UUID Information Leakage | Medium | GET |
+| 7 | Vertical Privilege Escalation | Hard | DELETE |
+| 8 | Private Note Access | Easy | GET |
+| 9 | API Key Impersonation | Hard | GET |
+| 10 | Admin Audit Log Exposure | Medium | GET |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Visit the **/lab-guide** page in the app for detailed challenge descriptions and hints.
+
+## 🌐 Deploy to Vercel
+
+1. Push your code to GitHub
+2. Import the repo in [Vercel](https://vercel.com)
+3. Add the `DATABASE_URL` environment variable in Vercel project settings
+4. Deploy!
+5. Run the seed script with your production DATABASE_URL: `DATABASE_URL=<your-url> node scripts/seed.js`
+
+## 🛠️ Recommended Tools
+
+- **Browser DevTools** (F12) — Network tab to inspect API calls
+- **Burp Suite** — Intercept and modify HTTP requests
+- **curl** — Craft custom API requests from the terminal
+- **Postman** — GUI for API testing
+
+## ⚠️ Disclaimer
+
+This application is **deliberately insecure** and should only be used in controlled educational environments. It demonstrates common web security vulnerabilities including:
+
+- Insecure Direct Object References (IDOR)
+- Missing access controls
+- Mass assignment vulnerabilities
+- Client-side only authentication
+- Plaintext password storage
+- Hardcoded secrets
+
+**Never deploy this to a public-facing server.**
