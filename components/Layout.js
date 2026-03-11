@@ -27,7 +27,21 @@ export default function Layout({ children, title = 'VaultApp' }) {
       return;
     }
     try {
-      setUser(JSON.parse(userData));
+      const parsed = JSON.parse(userData);
+      setUser(parsed);
+      // Fetch fresh user data from server to pick up any DB-level changes (e.g. role escalation via Burp)
+      fetch(`/api/users/${parsed.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.id) {
+            const freshUser = { ...parsed, ...data };
+            setUser(freshUser);
+            localStorage.setItem('vault_user', JSON.stringify(freshUser));
+          }
+        })
+        .catch(() => {}); // silently fail, keep localStorage data
     } catch {
       router.push('/login');
     }
