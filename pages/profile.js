@@ -48,7 +48,10 @@ export default function Profile() {
       const data = await res.json();
       if (res.ok) {
         setMessage('Profile updated successfully!');
-        setUser(prev => ({ ...prev, ...data.user }));
+        const updatedUser = { ...user, ...data.user };
+        setUser(updatedUser);
+        // Persist updated user data (including any changed role/balance) to localStorage
+        localStorage.setItem('vault_user', JSON.stringify(updatedUser));
       } else {
         setError(data.error || 'Update failed');
       }

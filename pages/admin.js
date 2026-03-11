@@ -13,8 +13,27 @@ export default function Admin() {
     if (userData) {
       const u = JSON.parse(userData);
       setUser(u);
-      // Client-side only role check — the API has NO server-side role check
-      setIsAdmin(u.role === 'admin');
+      // Fetch the latest user data from server to pick up any role changes
+      const token = localStorage.getItem('vault_token');
+      fetch(`/api/users/${u.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.role) {
+            const freshUser = { ...u, ...data };
+            setUser(freshUser);
+            setIsAdmin(freshUser.role === 'admin');
+            // Update localStorage so other pages also reflect the change
+            localStorage.setItem('vault_user', JSON.stringify(freshUser));
+          } else {
+            setIsAdmin(u.role === 'admin');
+          }
+        })
+        .catch(() => {
+          // Fallback to localStorage data if fetch fails
+          setIsAdmin(u.role === 'admin');
+        });
     }
   }, []);
 
